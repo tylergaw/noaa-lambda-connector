@@ -10,19 +10,34 @@ Globals:
     LoggingConfig:
       LogFormat: JSON
 Resources:
-  NOAAFetchFunction:
+  NOAADataFetchFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: noaa/
-      Handler: app.lambda_handler
+      Handler: noaa_data.lambda_handler
       Runtime: python3.11
-      FunctionName: noaa-fetch
+      FunctionName: noaa-data-fetch
       Architectures:
       - x86_64
       Environment:
         Variables:
           # Note: These secrets need to be created in the AWS Secrets manager
           NOAA_API_KEY: '{{resolve:secretsmanager:NOAACreds:SecretString:NOAA_API_KEY}}'
+
+  NOAAStationsFetchFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        CodeUri: noaa/
+        Handler: noaa_stations.lambda_handler
+        Runtime: python3.11
+        FunctionName: noaa-stations-fetch
+        Architectures:
+        - x86_64
+        Environment:
+          Variables:
+            # Note: These secrets need to be created in the AWS Secrets manager
+            NOAA_API_KEY: '{{resolve:secretsmanager:NOAACreds:SecretString:NOAA_API_KEY}}'
+
 
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
@@ -38,9 +53,16 @@ Resources:
         Ref: ApplicationResourceGroup
       AutoConfigurationEnabled: 'true'
 Outputs:
-  NOAAFetchFunction:
-    Description: NOAA Fetch Lambda Function ARN
-    Value: !GetAtt NOAAFetchFunction.Arn
-  NOAAFetchFunctionIamRole:
-    Description: Implicit IAM Role created for NOAA Fetch function
-    Value: !GetAtt NOAAFetchFunction.Arn
+  NOAADataFetchFunction:
+    Description: NOAA Data Fetch Lambda Function ARN
+    Value: !GetAtt NOAADataFetchFunction.Arn
+  NOAADataFetchFunctionIamRole:
+    Description: Implicit IAM Role created for NOAA Data Fetch function
+    Value: !GetAtt NOAADataFetchFunction.Arn
+  
+  NOAAStationsFetchFunction:
+    Description: NOAA Stations Fetch Lambda Function ARN
+    Value: !GetAtt NOAAStationsFetchFunction.Arn
+  NOAAStationsFetchFunctionIamRole:
+    Description: Implicit IAM Role created for NOAA Stations Fetch function
+    Value: !GetAtt NOAAStationsFetchFunction.Arn
