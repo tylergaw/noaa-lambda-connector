@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime, timedelta
 
 import requests
@@ -101,7 +102,11 @@ def make_noaa_data_req(headers, startdate) -> tuple[list, str]:
 
 
 def lambda_handler(event, context):
-    token = "jliUukwNdvOetaFgCqoHrRtWnWnvynpz"
+    try:
+        token = os.environ["NOAA_API_KEY"]
+    except KeyError:
+        err = "Error: NOAA_API_KEY not found in environment, can't fetch data."
+        return {"error": err}
     headers = {"token": token}
     print(f"Lambda invoked with event: {event}")
     state = event["state"]
